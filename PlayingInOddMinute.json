@@ -1,0 +1,227 @@
+{
+  "name": "PlayingInOddMinute",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "1-59/2 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "5709b0ea-ce64-402f-8254-dfcc6fc1e792",
+      "name": "CronOddMinute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        820,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "currentlyPlaying"
+      },
+      "id": "ccdae923-081d-41bd-9c8c-285bac622d53",
+      "name": "CheckNowPlayingTrack",
+      "type": "n8n-nodes-base.spotify",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        420
+      ],
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "2",
+          "name": "Spotify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "time",
+              "value": "={{ new Date().toISOString(\"\").replace('T', ' ').slice(0, -5).replaceAll('-', '').replaceAll(' ', '').replaceAll(':', '') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f8172a95-c36a-40a4-85ec-11a3e2cc61e7",
+      "name": "SetTime",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "options": {}
+      },
+      "id": "f26df3e6-d9e1-4970-9476-bc2f68f8bbe1",
+      "name": "MoveToBinary",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "./yanoseaNowPlaying/PlayingInOddMinute",
+        "options": {}
+      },
+      "id": "28851741-e72e-49ba-82af-8607f63fa87b",
+      "name": "WriteBinaryFile",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "8"
+      },
+      "id": "223104fd-b55c-4ea2-b77c-27e26b01c708",
+      "name": "ExecuteYanoseaNowPlaying",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1900,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "data",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "de18340f-663a-494d-9083-8c95fbff2cfb",
+      "name": "IF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        420
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "4474f260-3a59-42e7-b456-322985818d61",
+      "name": "NoOp",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        600
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "CronOddMinute": {
+      "main": [
+        [
+          {
+            "node": "CheckNowPlayingTrack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CheckNowPlayingTrack": {
+      "main": [
+        [
+          {
+            "node": "IF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SetTime": {
+      "main": [
+        [
+          {
+            "node": "MoveToBinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MoveToBinary": {
+      "main": [
+        [
+          {
+            "node": "WriteBinaryFile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WriteBinaryFile": {
+      "main": [
+        [
+          {
+            "node": "ExecuteYanoseaNowPlaying",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF": {
+      "main": [
+        [
+          {
+            "node": "SetTime",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NoOp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "callerPolicy": "any"
+  },
+  "hash": "191526bb4fb5e116ed4cfbbc610213e4",
+  "id": 6,
+  "meta": {
+    "instanceId": "21f9289afd63ea6ec40cb93df60977229b7f5b7bafa26e77c97a0db73daaafb8"
+  },
+  "tags": []
+}

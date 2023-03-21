@@ -1,0 +1,224 @@
+{
+  "name": "yanoseaNowPlaying",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "88c386e6-35a0-437e-b808-10863f33d1c6",
+      "name": "CronOneMinute",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "./yanoseaNowPlaying/PlayingInEvenMinute"
+      },
+      "id": "6171f5b8-7dd5-4622-b658-9b5e8023b08b",
+      "name": "ReadEvenMinute",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "./yanoseaNowPlaying/PlayingInOddMinute"
+      },
+      "id": "f3a92215-c8aa-4a87-8b83-02d8c2f2577b",
+      "name": "ReadOddMinute",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0e420711-15d1-4ed4-8af5-67fdd7fe9e15",
+      "name": "EvenMinuteMoveToBinary",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ee7d44d7-8cee-4b96-86d9-ac451b8a37e3",
+      "name": "OddMinuteMoveToBinary",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "item.id",
+              "field2": "item.id"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "options": {}
+      },
+      "id": "6c41f9c1-c077-4411-948d-99c379870607",
+      "name": "CompareEvenAndOdd",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        500
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field\n// called 'myNewField' to the JSON of each one\nvar even = parseInt($input.first().json.time);\nvar odd = parseInt($input.last().json.time);\nif(even > odd){\n  return $input.first();\n}else{\n  return $input.last();\n}"
+      },
+      "id": "58f0cb82-175a-48ac-b6f1-406babc1064a",
+      "name": "TakeLatest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "text": "=yanosea＠fly_2_fake ~> cat NOWPLAYING\n・URL: {{$json[\"item\"][\"external_urls\"][\"spotify\"]}}\nyanosea＠fly_2_fake ~> echo $NPHASHTAG\n#yanoseanowplaying\nyanosea＠fly_2_fake ~>",
+        "additionalFields": {}
+      },
+      "id": "ff5891f8-26c8-43cc-980b-ebd27d68cf15",
+      "name": "yanoseaNowPlaying!",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        500
+      ],
+      "credentials": {
+        "twitterOAuth1Api": {
+          "id": "4",
+          "name": "Twitter OAuth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "CronOneMinute": {
+      "main": [
+        [
+          {
+            "node": "ReadEvenMinute",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ReadOddMinute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReadEvenMinute": {
+      "main": [
+        [
+          {
+            "node": "EvenMinuteMoveToBinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReadOddMinute": {
+      "main": [
+        [
+          {
+            "node": "OddMinuteMoveToBinary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EvenMinuteMoveToBinary": {
+      "main": [
+        [
+          {
+            "node": "CompareEvenAndOdd",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OddMinuteMoveToBinary": {
+      "main": [
+        [
+          {
+            "node": "CompareEvenAndOdd",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "CompareEvenAndOdd": {
+      "main": [
+        [
+          {
+            "node": "TakeLatest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TakeLatest": {
+      "main": [
+        [
+          {
+            "node": "yanoseaNowPlaying!",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "callerPolicy": "any"
+  },
+  "hash": "e6a0cfc208173c3ef845569614f2d7ff",
+  "id": 8,
+  "meta": {
+    "instanceId": "21f9289afd63ea6ec40cb93df60977229b7f5b7bafa26e77c97a0db73daaafb8"
+  },
+  "tags": []
+}
